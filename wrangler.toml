@@ -1,0 +1,23 @@
+name = "reminders-telegram-bot"
+main = "packages/worker/src/index.ts"
+
+workers_dev = true
+compatibility_date = "2025-06-04"
+
+[ai]
+binding = "AI"
+
+[observability.logs]
+enabled = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "reminders-db"
+database_id = "4f9fb2d3-f03d-401c-a6bb-6f10382e28ed"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "share"
+
+[triggers]
+crons = ["* * * * *"]

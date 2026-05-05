@@ -1,0 +1,28 @@
+{
+	"name": "root",
+	"private": true,
+	"author": "codebam",
+	"license": "Apache-2.0",
+	"scripts": {
+		"build": "npm run build --workspaces",
+		"build:worker": "npm run build --workspace=packages/worker",
+		"test": "npm run test --workspaces",
+		"test:worker": "npm run test --workspace=packages/worker",
+		"test:main": "npm run test --workspace=packages/main",
+		"lint": "npm run lint --workspaces",
+		"ncu": "npx npm-check-updates -i --workspaces --root -u"
+	},
+	"workspaces": [
+		"packages/main",
+		"packages/worker"
+	],
+	"devDependencies": {
+		"@typescript-eslint/eslint-plugin": "^8.56.0",
+		"npm-check-updates": "^19.4.1",
+		"typedoc": "^0.28.17"
+	},
+	"version": "",
+	"dependencies": {
+		"@eslint/eslintrc": "^3.3.3"
+	}
+}

@@ -1,0 +1,32 @@
+name: publish github package
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  publish-github:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: latest
+          registry-url: https://npm.pkg.github.com/
+      - id: node-modules-cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+          restore-keys: node-modules-
+      - run: npm i
+      - run: npm ci
+      - run: npm run lint --workspace=packages
+      - run: npm run build --workspace=packages
+      - run: npm publish --workspace=packages/main
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
