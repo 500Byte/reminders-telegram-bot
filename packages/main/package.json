@@ -31,7 +31,7 @@
 		"url": "https://github.com/codebam/reminders-telegram-bot.git"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20260227.0",
+		"@cloudflare/workers-types": "^4.20260505.1",
 		"@eslint/js": "^10.0.1",
 		"@typescript-eslint/eslint-plugin": "^8.56.0",
 		"@typescript-eslint/parser": "^8.56.0",
