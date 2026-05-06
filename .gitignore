@@ -15,4 +15,5 @@ lerna-debug.log
 .wrangler/
 .direnv/
 .worktrees/
+docs/superpowers/
 result
