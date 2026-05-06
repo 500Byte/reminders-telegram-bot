@@ -4,7 +4,7 @@ export function parseTime(text: string, timezone: string): number | null {
     const now = Math.floor(Date.now() / 1000);
     
     // Relative: 10m, 1h, 1d, 1w
-    const relativeMatch = text.match(/^(\d+)([mhdw])$/);
+    const relativeMatch = /^(\d+)([mhdw])$/.exec(text);
     if (relativeMatch) {
         const value = parseInt(relativeMatch[1]);
         const unit = relativeMatch[2];
@@ -13,7 +13,7 @@ export function parseTime(text: string, timezone: string): number | null {
     }
     
     // Absolute: HH:MM
-    const absoluteMatch = text.match(/^(\d{1,2}):(\d{2})$/);
+    const absoluteMatch = /^(\d{1,2}):(\d{2})$/.exec(text);
     if (absoluteMatch) {
         const hours = parseInt(absoluteMatch[1]);
         const minutes = parseInt(absoluteMatch[2]);
@@ -43,27 +43,12 @@ export function parseTime(text: string, timezone: string): number | null {
         // Note: This is tricky in JS. A simple way is to use the parts to build a date
         // and then adjust for the offset, or just use the parts to calculate the target timestamp.
         
-        const targetDate = new Date(Date.UTC(
-            dateParts.year,
-            dateParts.month - 1,
-            dateParts.day,
-            hours,
-            minutes,
-            0,
-            0
-        ));
-
         // We need to account for the timezone offset of 'timezone' relative to UTC at that target time.
         // A better way is to use the fact that we want "today at HH:MM in timezone".
         
         // Let's use the toLocaleString trick from the prompt but carefully.
-        const targetTsStr = d.toLocaleString('en-US', { timeZone: timezone, hour12: false });
-        // targetTsStr is like "M/D/YYYY, HH:MM:SS"
-        const [datePart] = targetTsStr.split(', ');
-        const [m, day, y] = datePart.split('/');
         
         // Construct target date string for the target timezone
-        const targetDateString = `${y}-${m.padStart(2, '0')}-${day.padStart(2, '0')}T${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
         
         // This is still hard because we don't know the offset.
         // Let's use a simpler approach: 

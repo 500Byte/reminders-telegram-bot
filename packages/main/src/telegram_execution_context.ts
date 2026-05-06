@@ -132,9 +132,9 @@ export default class TelegramExecutionContext {
    * @param options - any additional options to pass to editMessageText
    * @returns Promise with the API response
    */
-  async editMessageText(text: string, options: Record<string, any> = {}) {
-    const chat_id = options.chat_id || this.update.callback_query?.message.chat.id || this.getChatId();
-    const message_id = options.message_id || this.update.callback_query?.message.message_id || this.getMessageId();
+  async editMessageText(text: string, options: Record<string, unknown> = {}) {
+    const chat_id = (options.chat_id as string | number | undefined) ?? this.update.callback_query?.message.chat.id ?? this.update.message?.chat.id;
+    const message_id = (options.message_id as number | undefined) ?? this.update.callback_query?.message.message_id ?? this.update.message?.message_id;
     
     return await this.api.editMessageText(this.bot.api.toString(), {
       ...options,
