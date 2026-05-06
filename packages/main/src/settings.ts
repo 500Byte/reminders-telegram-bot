@@ -5,5 +5,5 @@ export async function getEffectiveTimezone(db: D1Database, chat_id: string, user
     if (userSettings?.timezone) return userSettings.timezone;
 
     const chatSettings = await db.prepare("SELECT timezone FROM user_settings WHERE target_id = ?").bind(chat_id).first<{timezone: string}>();
-    return chatSettings?.timezone || 'UTC';
+    return chatSettings?.timezone ?? 'UTC';
 }
