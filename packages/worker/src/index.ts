@@ -134,7 +134,7 @@ export default {
 
 				const { results } = await env.DB.prepare('SELECT * FROM reminders WHERE id = ?').bind(reminderId).all();
 
-				const reminder = results[0];
+				const reminder = results[0] as Record<string, unknown> | undefined;
 				if (!reminder) {
 					await ctx.answerCallback('Este recordatorio ya no existe', true);
 					return new Response('ok');
@@ -179,8 +179,8 @@ export default {
 					await env.DB.prepare("UPDATE reminders SET scheduled_at = ?, status = 'active' WHERE id = ?")
 						.bind(now + minutes * 60, reminderId)
 						.run();
-					await ctx.answerCallback(`Pospuesto ${minutes} minutos`);
-					await ctx.editMessageText(`⏰ Recordatorio pospuesto ${minutes}m por ${username}:\n\n${String(reminder.message)}`);
+					await ctx.answerCallback(`Pospuesto ${String(minutes)} minutos`);
+					await ctx.editMessageText(`⏰ Recordatorio pospuesto ${String(minutes)}m por ${username}:\n\n${String(reminder.message)}`);
 				} else if (action === 'delete') {
 					await env.DB.prepare('DELETE FROM reminders WHERE id = ?').bind(reminderId).run();
 					await ctx.answerCallback('Recordatorio eliminado');
