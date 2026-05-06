@@ -110,7 +110,8 @@ export default {
 				const timezone = await getEffectiveTimezone(env.DB, chat_id, '');
 
 				for (const r of results) {
-					const dateStr = new Date((r.scheduled_at as number) * 1000).toLocaleString('es-ES', {
+					const scheduledTime = r.scheduled_at as number;
+					const dateStr = new Date(scheduledTime * 1000).toLocaleString('es-ES', {
 						timeZone: timezone,
 						hour: '2-digit',
 						minute: '2-digit',
@@ -150,8 +151,9 @@ export default {
 				if (!isCreator) {
 					const memberResponse = await ctx.getChatMember(chat_id, user_id);
 					if (memberResponse.ok) {
-						const memberData = (await memberResponse.json()) as { ok: boolean; result: { status: string } };
-						isAdmin = memberData.result.status === 'administrator' || memberData.result.status === 'creator';
+						const memberData = (await memberResponse.json());
+						const memberStatus = (memberData.result as { status: string }).status;
+						isAdmin = memberStatus === 'administrator' || memberStatus === 'creator';
 					}
 				}
 
@@ -205,6 +207,7 @@ export default {
 			.all();
 
 		for (const reminder of results) {
+			const reminderId = reminder.id as number;
 			ctx.waitUntil(
 				(async () => {
 					try {
@@ -215,23 +218,23 @@ export default {
 							reply_markup: {
 								inline_keyboard: [
 									[
-										{ text: '✅ Hecho', callback_data: `done_${String(reminder.id)}` },
-										{ text: '⏰ Posponer 15m', callback_data: `snooze_${String(reminder.id)}_15` },
-										{ text: '🗑️ Eliminar', callback_data: `delete_${String(reminder.id)}` },
+										{ text: '✅ Hecho', callback_data: `done_${String(reminderId)}` },
+										{ text: '⏰ Posponer 15m', callback_data: `snooze_${String(reminderId)}_15` },
+										{ text: '🗑️ Eliminar', callback_data: `delete_${String(reminderId)}` },
 									],
 								],
 							},
 						});
 
 						if (!response.ok) {
-							const errorData = (await response.json()) as { error_code?: number };
+							const errorData = (await response.json());
 							if (errorData.error_code === 403 || errorData.error_code === 401) {
-								await env.DB.prepare("UPDATE reminders SET status = 'failed' WHERE id = ?").bind(reminder.id).run();
+								await env.DB.prepare("UPDATE reminders SET status = 'failed' WHERE id = ?").bind(reminderId).run();
 							} else {
 								await env.DB.prepare(
 									"UPDATE reminders SET status = CASE WHEN fail_count >= 3 THEN 'failed' ELSE status END, fail_count = fail_count + 1 WHERE id = ?"
 								)
-									.bind(reminder.id)
+									.bind(reminderId)
 									.run();
 							}
 							return;
@@ -239,10 +242,10 @@ export default {
 
 						if (reminder.recurrence === 'daily') {
 							await env.DB.prepare('UPDATE reminders SET scheduled_at = scheduled_at + 86400, fail_count = 0 WHERE id = ?')
-								.bind(reminder.id)
+								.bind(reminderId)
 								.run();
 						} else {
-							await env.DB.prepare("UPDATE reminders SET status = 'completed', fail_count = 0 WHERE id = ?").bind(reminder.id).run();
+							await env.DB.prepare("UPDATE reminders SET status = 'completed', fail_count = 0 WHERE id = ?").bind(reminderId).run();
 						}
 					} catch (e) {
 						console.error(`Error processing reminder ${String(reminder.id)}:`, e);
